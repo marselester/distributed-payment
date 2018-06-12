@@ -1,0 +1,6 @@
+.DS_Store
+/vendor
+/accountantd
+/paymentd
+/transfer-server
+*.db
