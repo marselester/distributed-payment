@@ -2,6 +2,7 @@
 
 [![Documentation](https://godoc.org/github.com/marselester/distributed-payment?status.svg)](https://godoc.org/github.com/marselester/distributed-payment)
 [![Go Report Card](https://goreportcard.com/badge/github.com/marselester/distributed-payment)](https://goreportcard.com/report/github.com/marselester/distributed-payment)
+Also have a look at [distributed signup](https://github.com/marselester/distributed-signup).
 
 This project demonstrates execution of a payment transaction without an atomic commit across 3 partitions
 (a primer from "Designing Data-Intensive Applications" book):
@@ -46,7 +47,7 @@ Alice's account must be deducted only once. The accountant №2 skipped a duplic
 ## Get Started
 
 We need Kafka which will have `wallet.transfer_request` and `wallet.payment` topics with 2 partitions and 1 replica.
-Docker Compose will take care of that. The only caveat is that you should set KAFKA_ADVERTISED_HOST_NAME.
+Docker Compose will take care of that. The only caveat is that you should set `KAFKA_ADVERTISED_HOST_NAME`.
 
 ```sh
 $ cd ./docker/
@@ -83,19 +84,33 @@ Content-Length: 96
 
 ## Stream Processors
 
-Since we have some transfer requests in Kafka, we can run two **paymentd** processes for each partition.
+Since we have a transfer request in Kafka, we can run two **paymentd** processes for each partition
+to create corresponding payments.
 
 ```sh
 $ ./paymentd -partition=0
 $ ./paymentd -partition=1
+1:0 a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11 Alice -$0.50
+0:0 a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11 Bob +$0.50
 ```
+
+Payments are printed in `partition_id:offset request_id account amount` format.
+As you can see:
+
+- a transfer has been stored in partition 1 (no output from `./paymentd -partition=0`),
+- Alice's outgoing payment was stored in partition 1,
+- Bob's incoming payment landed at partition 0.
 
 Payment instructions end up in `wallet.payment` topic's partitions. Let's process them, so Alice's and Bob's balances are updated:
 
-```
+```sh
 $ ./accountantd -partition=0
+Bob balance: 0.50 USD
 $ ./accountantd -partition=1
+Alice balance: -0.50 USD
 ```
+
+Try sending a duplicate request and see if balances stay the same.
 
 ## Future Work
 

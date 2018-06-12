@@ -33,6 +33,8 @@ func (s *TransferService) CreateTransfer(ctx context.Context, t *wallet.Transfer
 		s.client.logger.Log("level", "debug", "msg", "transfer not created", "topic", s.client.copts.transferTopic, "body", b, "err", err)
 		return err
 	}
+	t.Partition = partition
+	t.SequenceID = offset
 
 	s.client.logger.Log("level", "debug", "msg", "transfer created", "partition", partition, "offset", offset, "body", b)
 	return nil

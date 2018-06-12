@@ -33,6 +33,8 @@ func (s *PaymentService) CreatePayment(ctx context.Context, p *wallet.Payment) e
 		s.client.logger.Log("level", "debug", "msg", "payment not created", "topic", s.client.copts.paymentTopic, "body", b, "err", err)
 		return err
 	}
+	p.Partition = partition
+	p.SequenceID = offset
 
 	s.client.logger.Log("level", "debug", "msg", "payment created", "partition", partition, "offset", offset, "body", b)
 	return nil

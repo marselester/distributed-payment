@@ -87,7 +87,7 @@ func main() {
 			log.Fatalf("accountantd: failed to update balance: %v", err)
 		}
 		balance[p.Account] = bal
-		fmt.Printf("%s $%s\n", p.Account, bal.Text('f'))
+		fmt.Printf("%s balance: %s USD\n", p.Account, bal.Text('f'))
 
 		if err := dedup.Save(p.RequestID); err != nil {
 			log.Fatalf("accountantd: failed to save request ID: %v", err)
