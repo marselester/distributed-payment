@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"time"
 
 	"github.com/facebookgo/flagenv"
 	kitlog "github.com/go-kit/kit/log"
@@ -51,8 +52,11 @@ func main() {
 
 	// http server could be also placed in rest package to hide net/http dependencies.
 	srv := http.Server{
-		Addr:    *apiAddr,
-		Handler: api,
+		Addr:         *apiAddr,
+		Handler:      api,
+		ReadTimeout:  5 * time.Second,
+		WriteTimeout: 10 * time.Second,
+		IdleTimeout:  30 * time.Second,
 	}
 	idleConnsClosed := make(chan struct{})
 	go func() {
